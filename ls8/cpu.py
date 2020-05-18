@@ -2,12 +2,27 @@
 
 import sys
 
+
 class CPU:
     """Main CPU class."""
 
     def __init__(self):
         """Construct a new CPU."""
-        pass
+        self.ram = [0] * 256
+        self.reg = [0] * 8
+        self.pc = 0
+        self.ir = 0
+        self.mar = 0
+        self.mdr = 0
+        self.fl = False
+
+
+# - `PC`: Program Counter, address of the currently executing instruction
+# - `IR`: Instruction Register, contains a copy of the currently executing instruction
+# - `MAR`: Memory Address Register, holds the memory address we're reading or writing
+# - `MDR`: Memory Data Register, holds the value to write or the value just read
+# - `FL`: Flags, see below
+
 
     def load(self):
         """Load a program into memory."""
@@ -18,25 +33,24 @@ class CPU:
 
         program = [
             # From print8.ls8
-            0b10000010, # LDI R0,8
+            0b10000010,  # LDI R0,8
             0b00000000,
             0b00001000,
-            0b01000111, # PRN R0
+            0b01000111,  # PRN R0
             0b00000000,
-            0b00000001, # HLT
+            0b00000001,  # HLT
         ]
 
         for instruction in program:
             self.ram[address] = instruction
             address += 1
 
-
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        #elif op == "SUB": etc
+        # elif op == "SUB": etc
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -48,8 +62,8 @@ class CPU:
 
         print(f"TRACE: %02X | %02X %02X %02X |" % (
             self.pc,
-            #self.fl,
-            #self.ie,
+            # self.fl,
+            # self.ie,
             self.ram_read(self.pc),
             self.ram_read(self.pc + 1),
             self.ram_read(self.pc + 2)
@@ -63,3 +77,21 @@ class CPU:
     def run(self):
         """Run the CPU."""
         pass
+
+    def ram_read(self, address):
+        """ should accept the address to read and return the value stored there. """
+
+        return self.ram[address]
+
+    def ram_write(self, address, value_to_write):
+        """  should accept a value to write, and the address to write it to. """
+
+        self.ram[address] = value_to_write
+
+
+# > Inside the CPU, there are two internal registers used for memory operations:
+# > the _Memory Address Register_ (MAR) and the _Memory Data Register_ (MDR). The
+# > MAR contains the address that is being read or written to. The MDR contains
+# > the data that was read or the data to write. You don't need to add the MAR or
+# > MDR to your `CPU` class, but they would make handy parameter names for
+# > `ram_read()` and `ram_write()`, if you wanted.
