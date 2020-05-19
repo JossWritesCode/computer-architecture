@@ -82,13 +82,51 @@ class CPU:
         # It needs to read the memory address that's stored in register `PC`, and store
         # that result in `IR`, the _Instruction Register_. This can just be a local
         # variable in `run()`.
-        IR = self.ram[self.PC]
+        IR = self.ram_read(self.PC)
         # Some instructions requires up to the next two bytes of data _after_ the `PC` in
         # memory to perform operations on. Sometimes the byte value is a register number,
         # other times it's a constant value (in the case of `LDI`). Using `ram_read()`,
-        # read the bytes at `PC+1` and `PC+2` from RAM into variables `operand_a` and
-        # `operand_b` in case the instruction needs them.
 
+        # read the bytes at `PC+1` and `PC+2` from RAM into variables `operand_a` and
+        operand_a = self.ram_read(self.PC + 1)
+        # `operand_b` in case the instruction needs them.
+        operand_b = self.ram_read(self.PC + 2)
+        running = True
+
+        while running:
+
+            if IR == "HLT":
+                running = False
+
+            elif IR == "LDI":
+                """`LDI register immediate`
+
+                Set the value of a register to an integer.
+
+                Machine code:
+
+                ```
+                10000010 00000rrr iiiiiiii
+                82 0r ii
+    ```"""
+                self.reg = int(self.register)
+
+            elif IR == "PRN":
+                """
+                PRN register pseudo-instruction
+
+                Print numeric value stored in the given register.
+
+                Print to the console the decimal integer value that is stored in the given
+                register.
+
+                Machine code:
+
+                01000111 00000rrr
+                47 0r
+                """
+
+                print(self.reg)
         # Then, depending on the value of the opcode, perform the actions needed for the
         # instruction per the LS-8 spec. Maybe an `if-elif` cascade...? There are other
         # options, too.
@@ -97,7 +135,6 @@ class CPU:
         # to point to the next instruction for the next iteration of the loop in `run()`.
         # The number of bytes an instruction uses can be determined from the two high bits
         # (bits 6-7) of the instruction opcode. See the LS-8 spec for details.
-        pass
 
     def ram_read(self, MAR):
         """ should accept the address to read and return the value stored there. """
