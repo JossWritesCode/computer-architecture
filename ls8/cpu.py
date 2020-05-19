@@ -2,6 +2,10 @@
 
 import sys
 
+HLT = 0b00000001
+PRN = 0b01000111
+LDI = 0b10000010
+
 
 class CPU:
     """Main CPU class."""
@@ -22,6 +26,7 @@ class CPU:
 # - `MAR`: Memory Address Register, holds the memory address we're reading or writing
 # - `MDR`: Memory Data Register, holds the value to write or the value just read
 # - `FL`: Flags, see below
+
 
     def load(self):
         """Load a program into memory."""
@@ -82,23 +87,22 @@ class CPU:
         # It needs to read the memory address that's stored in register `PC`, and store
         # that result in `IR`, the _Instruction Register_. This can just be a local
         # variable in `run()`.
-        IR = self.ram_read(self.pc)
-        # Some instructions requires up to the next two bytes of data _after_ the `PC` in
-        # memory to perform operations on. Sometimes the byte value is a register number,
-        # other times it's a constant value (in the case of `LDI`). Using `ram_read()`,
-
-        # read the bytes at `PC+1` and `PC+2` from RAM into variables `operand_a` and
-        operand_a = self.ram_read(self.pc + 1)
-        # `operand_b` in case the instruction needs them.
-        operand_b = self.ram_read(self.pc + 2)
         running = True
-
         while running:
+            IR = self.ram_read(self.pc)
+            # Some instructions requires up to the next two bytes of data _after_ the `PC` in
+            # memory to perform operations on. Sometimes the byte value is a register number,
+            # other times it's a constant value (in the case of `LDI`). Using `ram_read()`,
 
-            if IR == "HLT":
+            # read the bytes at `PC+1` and `PC+2` from RAM into variables `operand_a` and
+            operand_a = self.ram_read(self.pc + 1)
+            # `operand_b` in case the instruction needs them.
+            operand_b = self.ram_read(self.pc + 2)
+
+            if IR == HLT:
                 running = False
 
-            elif IR == "LDI":
+            elif IR == LDI:
                 """`LDI register immediate`
 
                 Set the value of a register to an integer.
@@ -109,9 +113,11 @@ class CPU:
                 10000010 00000rrr iiiiiiii
                 82 0r ii
     ```"""
-                self.reg = int(self.reg)
+                self.reg[operand_a] = operand_b
 
-            elif IR == "PRN":
+                self.pc += 3
+
+            elif IR == PRN:
                 """
                 PRN register pseudo-instruction
 
@@ -126,7 +132,9 @@ class CPU:
                 47 0r
                 """
 
-                print(self.reg)
+                print(self.reg[operand_a])
+                self.pc += 2
+
         # Then, depending on the value of the opcode, perform the actions needed for the
         # instruction per the LS-8 spec. Maybe an `if-elif` cascade...? There are other
         # options, too.
