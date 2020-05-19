@@ -82,15 +82,15 @@ class CPU:
         # It needs to read the memory address that's stored in register `PC`, and store
         # that result in `IR`, the _Instruction Register_. This can just be a local
         # variable in `run()`.
-        IR = self.ram_read(self.PC)
+        IR = self.ram_read(self.pc)
         # Some instructions requires up to the next two bytes of data _after_ the `PC` in
         # memory to perform operations on. Sometimes the byte value is a register number,
         # other times it's a constant value (in the case of `LDI`). Using `ram_read()`,
 
         # read the bytes at `PC+1` and `PC+2` from RAM into variables `operand_a` and
-        operand_a = self.ram_read(self.PC + 1)
+        operand_a = self.ram_read(self.pc + 1)
         # `operand_b` in case the instruction needs them.
-        operand_b = self.ram_read(self.PC + 2)
+        operand_b = self.ram_read(self.pc + 2)
         running = True
 
         while running:
@@ -109,7 +109,7 @@ class CPU:
                 10000010 00000rrr iiiiiiii
                 82 0r ii
     ```"""
-                self.reg = int(self.register)
+                self.reg = int(self.reg)
 
             elif IR == "PRN":
                 """
