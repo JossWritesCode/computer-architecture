@@ -5,6 +5,7 @@ import sys
 HLT = 0b00000001
 PRN = 0b01000111
 LDI = 0b10000010
+MUL = 0b10100010
 
 
 class CPU:
@@ -26,6 +27,7 @@ class CPU:
 # - `MAR`: Memory Address Register, holds the memory address we're reading or writing
 # - `MDR`: Memory Data Register, holds the value to write or the value just read
 # - `FL`: Flags, see below
+
 
     def load(self):
         """Load a program into memory."""
@@ -146,6 +148,23 @@ class CPU:
 
                 self.pc += 3
 
+            elif IR == MUL:
+                """ This is an instruction handled by the ALU._
+
+                 `MUL registerA registerB`
+
+                 Multiply the values in two registers together and store the result in registerA.
+
+                 Machine code:
+
+                 ```
+                 10100010 00000aaa 00000bbb
+                 A2 0a 0b
+                 ```
+                """
+
+                self.reg[operand_a] = operand_a * operand_b
+                self.pc += 3
             elif IR == PRN:
                 """
                 PRN register pseudo-instruction
