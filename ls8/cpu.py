@@ -6,6 +6,7 @@ HLT = 0b00000001
 PRN = 0b01000111
 LDI = 0b10000010
 MUL = 0b10100010
+ADD = 0b10100000
 
 
 class CPU:
@@ -83,9 +84,10 @@ class CPU:
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
 
-        if op == "ADD":
+        if op == ADD:
             self.reg[reg_a] += self.reg[reg_b]
-        # elif op == "SUB": etc
+        elif op == MUL:
+            self.reg[reg_a] *= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -163,8 +165,13 @@ class CPU:
                  ```
                 """
 
-                self.reg[operand_a] = operand_a * operand_b
+                self.alu(MUL, operand_a, operand_b)
                 self.pc += 3
+
+            elif IR == ADD:
+                self.alu(ADD, operand_a, operand_b)
+                self.pc += 3
+
             elif IR == PRN:
                 """
                 PRN register pseudo-instruction
