@@ -27,7 +27,6 @@ class CPU:
 # - `MDR`: Memory Data Register, holds the value to write or the value just read
 # - `FL`: Flags, see below
 
-
     def load(self):
         """Load a program into memory."""
 
@@ -35,19 +34,49 @@ class CPU:
 
         # For now, we've just hardcoded a program:
 
-        program = [
-            # From print8.ls8
-            0b10000010,  # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111,  # PRN R0
-            0b00000000,
-            0b00000001,  # HLT
-        ]
+        # program = [
+        #     # From print8.ls8
+        #     0b10000010,  # LDI R0,8
+        #     0b00000000,
+        #     0b00001000,
+        #     0b01000111,  # PRN R0
+        #     0b00000000,
+        #     0b00000001,  # HLT
+        # ]
 
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+        # Note that `sys.argv[0]` is the name of the running program itself.
+
+        # If the user runs `python3 ls8.py examples/mult.ls8`, the values in `sys.argv`
+        # will be:
+
+        # ```python
+        # sys.argv[0] == "ls8.py"
+        # sys.argv[1] == "examples/mult.ls8"
+        # ```
+
+        # so you can look in `sys.argv[1]` for the name of the file to load.
+
+        # > Bonus: check to make sure the user has put a command line argument where you
+        # > expect, and print an error and exit if they didn't.
+
+        # In `load()`, you will now want to use those command line arguments to open a
+        # file, read in its contents line by line, and save appropriate data into RAM.
+
+        # As you process lines from the file, you should be on the lookout for blank lines
+        # (ignore them), and you should ignore everything after a `#`, since that's a
+        # comment.
+
+        # You'll have to convert the binary strings to integer values to store in RAM. The
+        # built-in `int()` function can do that when you specify a number base as the
+        # second argument:
+        with open(sys.argv[1]) as program:
+            for instruction in program:
+                val = instruction.split("#")[0].strip()
+                if val == "":
+                    continue
+                v = int(val, 2)
+                self.ram[address] = v
+                address += 1
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -126,7 +155,7 @@ class CPU:
                 Print to the console the decimal integer value that is stored in the given
                 register.
 
-                Machine code:
+                Machine code:54
 
                 01000111 00000rrr
                 47 0r
