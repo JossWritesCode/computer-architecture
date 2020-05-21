@@ -11,6 +11,7 @@ PUSH = 0b01000101
 POP = 0b01000110
 CALL = 0b01010000
 IRET = 0b00010011
+RET = 0b00010001
 
 
 class CPU:
@@ -140,32 +141,46 @@ class CPU:
                 running = False
 
             elif IR == CALL:
+                """`CALL register`
+
+                # Calls a subroutine (function) at the address stored in the register.
+
+
+                # Machine code:
+
+                # ```
+                # 01010000 00000rrr
+                # 50 0r
+                # ```
+                # 1. The address of the **_instruction_** _directly after_ `CALL` is
+                #    pushed onto the stack. This allows us to return to where we left off when the subroutine finishes executing."""
+
                 # 2. The PC is set to the address stored in the given register. We jump to that location in RAM and execute the first instruction in the subroutine. The PC can move forward or backwards from its current location.
                 self.sp -= 1
                 self.ram[self.sp] = self.pc + 2
                 self.pc = self.reg[operand_a]
 
-            elif IR == IRET:
+            elif IR == RET:
                 """
-                `IRET`
+                `RET`
 
-                Return from an interrupt handler.
+                Return from subroutine.
 
-                The following steps are executed:
+                Pop the value from the top of the stack and store it in the `PC`.
 
-                1. Registers R6-R0 are popped off the stack in that order.
-                2. The `FL` register is popped off the stack.
-                3. The return address is popped off the stack and stored in `PC`.
-                4. Interrupts are re-enabled
-
-                Machine code:
+                Machine Code:
 
                 ```
-                00010011
-                13
+                00010001
+                11
                 ```
+
                 """
-                pass
+                popped = self.ram[self.sp]
+
+                self.pc = popped
+
+                self.sp += 1
 
             elif IR == PUSH:
                 # 1. decrement the SP
@@ -207,7 +222,7 @@ class CPU:
                 ```
                 10000010 00000rrr iiiiiiii
                 82 0r ii
-    ```"""
+                ```"""
                 self.reg[operand_a] = operand_b
 
                 self.pc += 3
