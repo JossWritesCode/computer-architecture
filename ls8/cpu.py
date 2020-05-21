@@ -7,6 +7,8 @@ PRN = 0b01000111
 LDI = 0b10000010
 MUL = 0b10100010
 ADD = 0b10100000
+PUSH = 0b01000101
+POP = 0b01000110
 
 
 class CPU:
@@ -21,6 +23,7 @@ class CPU:
         self.mar = 0
         self.mdr = 0
         self.fl = False
+        self.sp = 7
 
 
 # - `PC`: Program Counter, address of the currently executing instruction
@@ -134,6 +137,36 @@ class CPU:
 
             if IR == HLT:
                 running = False
+
+            elif IR == PUSH:
+                # 1. decrement the SP
+                self.sp -= 1
+                # 2. copy the value from the given register into memory at address SP
+
+                self.ram[self.sp] = self.reg[operand_a]
+
+                self.pc += 2
+
+            elif IR == POP:
+                """
+                `POP register`
+
+                Pop the value at the top of the stack into the given register.
+
+                1. Copy the value from the address pointed to by `SP` to the given register.
+                2. Increment `SP`.
+
+                Machine code:
+
+                ```
+                01000110 00000rrr"""
+                popped = self.ram[self.sp]
+
+                self.reg[operand_a] = popped
+
+                self.sp += 1
+
+                self.pc += 2
 
             elif IR == LDI:
                 """`LDI register immediate`
