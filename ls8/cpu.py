@@ -9,6 +9,8 @@ MUL = 0b10100010
 ADD = 0b10100000
 PUSH = 0b01000101
 POP = 0b01000110
+CALL = 0b01010000
+IRET = 0b00010011
 
 
 class CPU:
@@ -23,7 +25,7 @@ class CPU:
         self.mar = 0
         self.mdr = 0
         self.fl = False
-        self.sp = 7
+        self.sp = 0xF4
 
 
 # - `PC`: Program Counter, address of the currently executing instruction
@@ -31,7 +33,6 @@ class CPU:
 # - `MAR`: Memory Address Register, holds the memory address we're reading or writing
 # - `MDR`: Memory Data Register, holds the value to write or the value just read
 # - `FL`: Flags, see below
-
 
     def load(self):
         """Load a program into memory."""
@@ -137,6 +138,34 @@ class CPU:
 
             if IR == HLT:
                 running = False
+
+            elif IR == CALL:
+                # 2. The PC is set to the address stored in the given register. We jump to that location in RAM and execute the first instruction in the subroutine. The PC can move forward or backwards from its current location.
+                self.sp -= 1
+                self.ram[self.sp] = self.pc + 2
+                self.pc = self.reg[operand_a]
+
+            elif IR == IRET:
+                """
+                `IRET`
+
+                Return from an interrupt handler.
+
+                The following steps are executed:
+
+                1. Registers R6-R0 are popped off the stack in that order.
+                2. The `FL` register is popped off the stack.
+                3. The return address is popped off the stack and stored in `PC`.
+                4. Interrupts are re-enabled
+
+                Machine code:
+
+                ```
+                00010011
+                13
+                ```
+                """
+                pass
 
             elif IR == PUSH:
                 # 1. decrement the SP
